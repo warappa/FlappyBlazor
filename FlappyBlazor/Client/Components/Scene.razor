@@ -1,0 +1,145 @@
+﻿@if (GameManager != null)
+{
+<div class="scene" @onkeydown="e => KeyDown(e)" tabindex="0">
+    <div class="sky" >
+        <div class="bird" 
+            style="top: @(GameManager.Bird?.Top ?? 0)px; 
+            animation-name: @(GameManager.IsRunning ? "bird-animation" : "")
+        "></div>
+
+        <div class="pipe top" ></div>
+        <div class="pipe bottom" ></div>
+    </div>
+    <div class="ground" @onclick="e => Start()"
+        style="animation-name: @(GameManager.IsRunning ? "ground-animation" : "")"></div>
+</div>
+}
+
+@code {
+    public GameManager GameManager { get; set; } = new GameManager();
+
+    public void Start()
+    {
+        GameManager.StartGame();
+    }
+
+    public void KeyDown(KeyboardEventArgs e)
+    {
+        Console.WriteLine("Key down");
+        GameManager.Bird.Jump();
+    }
+
+    protected override void OnInitialized()
+    {
+        GameManager.Rendered += () =>
+        {
+            StateHasChanged();
+        };
+    }
+}
+
+<style>
+    .scene {
+        scale: 2;
+        transform-origin: 0 0;
+        margin: 20px;
+        width: 144px;
+        height: 256px;
+        position: relative;
+    }
+
+    .sky {
+        background: url("assets/bg-day.png") no-repeat;
+        width: 100%;
+        height: 100%;
+            
+        image-rendering: optimizeSpeed;             /* STOP SMOOTHING, GIVE ME SPEED  */
+        image-rendering: -moz-crisp-edges;          /* Firefox                        */
+        image-rendering: -o-crisp-edges;            /* Opera                          */
+        image-rendering: -webkit-optimize-contrast; /* Chrome (and eventually Safari) */
+        image-rendering: pixelated; /* Chrome */
+        image-rendering: optimize-contrast;         /* CSS3 Proposed                  */
+        -ms-interpolation-mode: nearest-neighbor;   /* IE8+                           */
+    }
+
+    .bird {
+        background: url("assets/bird-wing-up.png") no-repeat;
+        position: absolute;
+        width: 17px;
+        height: 12px;
+        left: calc(50% - 8px);
+        animation-duration: 0.5s;
+        animation-timing-function: linear;
+        animation-iteration-count: infinite;
+
+        image-rendering: optimizeSpeed;             /* STOP SMOOTHING, GIVE ME SPEED  */
+        image-rendering: -moz-crisp-edges;          /* Firefox                        */
+        image-rendering: -o-crisp-edges;            /* Opera                          */
+        image-rendering: -webkit-optimize-contrast; /* Chrome (and eventually Safari) */
+        image-rendering: pixelated; /* Chrome */
+        image-rendering: optimize-contrast;         /* CSS3 Proposed                  */
+        -ms-interpolation-mode: nearest-neighbor;   /* IE8+                           */
+        filter: drop-shadow(1px 1px 2px rgba(0,0,0,0.3));
+    }
+
+    .pipe {
+        position: absolute;
+        width: 200px;
+        height: 100%;
+
+        image-rendering: optimizeSpeed;             /* STOP SMOOTHING, GIVE ME SPEED  */
+        image-rendering: -moz-crisp-edges;          /* Firefox                        */
+        image-rendering: -o-crisp-edges;            /* Opera                          */
+        image-rendering: -webkit-optimize-contrast; /* Chrome (and eventually Safari) */
+        image-rendering: pixelated; /* Chrome */
+        image-rendering: optimize-contrast;         /* CSS3 Proposed                  */
+        -ms-interpolation-mode: nearest-neighbor;   /* IE8+                           */
+    }
+
+    .ground {
+        background: url("assets/ground.png") no-repeat;
+
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 40px;
+        background-color: brown;
+        animation-duration: 0.25s;
+        animation-timing-function: linear;
+        animation-iteration-count: infinite;
+
+        image-rendering: optimizeSpeed;             /* STOP SMOOTHING, GIVE ME SPEED  */
+        image-rendering: -moz-crisp-edges;          /* Firefox                        */
+        image-rendering: -o-crisp-edges;            /* Opera                          */
+        image-rendering: -webkit-optimize-contrast; /* Chrome (and eventually Safari) */
+        image-rendering: pixelated; /* Chrome */
+        image-rendering: optimize-contrast;         /* CSS3 Proposed                  */
+        -ms-interpolation-mode: nearest-neighbor;   /* IE8+                           */
+    }
+    @@keyframes ground-animation {
+        from {
+            background-position-x: 0px;
+        }
+        to {
+            background-position-x: -11px;
+        }
+    }
+    @@keyframes bird-animation {
+        0% {
+            background-image: url(assets/bird-wing-up.png);
+        }
+        30% {
+            background-image: url(assets/bird-wing-middle.png);
+        }
+        60% {
+            background-image: url(assets/bird-wing-down.png);
+        }
+        90% {
+            background-image: url(assets/bird-wing-middle.png);
+        }
+        100% {
+            background-image: url(assets/bird-wing-up.png);
+        }
+    }
+</style>
