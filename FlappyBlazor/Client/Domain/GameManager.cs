@@ -5,90 +5,17 @@ using System.Threading.Tasks;
 
 namespace FlappyBlazor.Client.Domain
 {
-    public class Bird
-    {
-        public double Gravity = 0.15;
-        public int Top { get; internal set; } = 0;
-        public double Velocity { get; set; } = 0.0;
-
-        public bool Jumped { get; private set; }
-
-        public void Move(double delta)
-        {
-            if (Jumped)
-            {
-                Jumped = false;
-                Velocity = -3;
-            }
-            Velocity = Velocity + Gravity * delta;
-            //Console.WriteLine($"Velocity {Gravity} {Velocity} {delta}");
-            Top += (int)Math.Floor(Velocity);
-
-            Top = Math.Min(Math.Max(Top, 0), 216 - 12);
-            if (Top == 216 - 12)
-            {
-                Velocity = 0;
-            }
-        }
-
-        public void Jump()
-        {
-            Jumped = true;
-        }
-
-        public void Reset()
-        {
-            Top = 0;
-        }
-    }
-
-    public class Pipe
-    {
-        public int Left { get; set; }
-        public int Top { get; set; }
-    }
-
-    public class Pipes
-    {
-        public Pipes()
-        {
-            PipeBottom = new Pipe();
-            PipeTop = new Pipe();
-        }
-
-        public Pipe PipeTop { get; set; }
-        public Pipe PipeBottom { get; set; }
-
-        public double Velocity { get; set; } = 1.0;
-
-        public void Move(double delta)
-        {
-            //Console.WriteLine($"Velocity {Gravity} {Velocity} {delta}");
-            PipeTop.Left -= (int)Math.Floor(Velocity * delta);
-            PipeBottom.Left -= (int)Math.Floor(Velocity * delta);
-
-            if (PipeTop.Left < -30)
-            {
-                Reset();
-            }
-        }
-
-        public void Reset()
-        {
-            PipeTop.Left = 150;
-            PipeBottom.Left = 150;
-            var random = 128 - 40 + new Random().Next(-44, 44);
-            PipeTop.Top = random - 25;
-            PipeBottom.Top = random + 25;
-        }
-    }
-
     public class GameManager
     {
         public Bird Bird { get; set; } = new Bird();
         public Pipes Pipes { get; set; } = new Pipes();
 
+        public int Score { get; set; }
+        public int BestScore { get; set; }
+
         public bool IsRunning { get; private set; }
+        public bool IsGameOver { get; private set; }
+        public bool IsPaused { get; private set; }
 
         private CancellationTokenSource loopCancellationToken;
 
@@ -96,23 +23,35 @@ namespace FlappyBlazor.Client.Domain
 
         public void StartGame()
         {
-            if (IsRunning)
-            {
-                loopCancellationToken?.Cancel();
-                IsRunning = false;
-                return;
-            }
-
             Console.WriteLine("Start Game");
 
-            Bird.Reset();
+            Score = 0;
 
+            Bird.Reset();
             Pipes.Reset();
 
+            IsGameOver = false;
             IsRunning = true;
+            IsPaused = false;
 
             loopCancellationToken = new CancellationTokenSource();
             _ = GameLoop(loopCancellationToken.Token);
+        }
+
+        public void PauseGame()
+        {
+            if (!IsPaused)
+            {
+                IsPaused = true;
+            }
+        }
+
+        public void ResumeGame()
+        {
+            if (IsPaused)
+            {
+                IsPaused = false;
+            }
         }
 
         public async Task GameLoop(CancellationToken cancellationToken)
@@ -126,16 +65,24 @@ namespace FlappyBlazor.Client.Domain
             {
                 var deltaMs = stopwatch.ElapsedMilliseconds - lastTicks;
                 var delta = deltaMs / 8;
+                if (!IsPaused)
+                {
 
-                //Console.WriteLine($"Loop {delta} {deltaMs} {stopwatch.ElapsedMilliseconds}");
+                    //Console.WriteLine($"Loop {delta} {deltaMs} {stopwatch.ElapsedMilliseconds}");
 
-                Bird.Move(delta);
-                Pipes.Move(delta);
+                    Bird.Move(delta);
+                    Pipes.Move(delta);
 
+                    CheckCollisions();
+
+                    CheckPassedPipes();
+
+
+                    Rendered?.Invoke();
+                }
+                
                 lastTicks = stopwatch.ElapsedMilliseconds;
-
-                Rendered?.Invoke();
-
+                
                 await Task.Delay(8);
 
                 if (cancellationToken.IsCancellationRequested)
@@ -145,6 +92,53 @@ namespace FlappyBlazor.Client.Domain
             }
 
             stopwatch.Stop();
+        }
+
+        private void CheckPassedPipes()
+        {
+            if (Pipes.IsPassed)
+            {
+                return;
+            }
+
+            var pipeBounds = Pipes.PipeTop.GetBounds();
+            if (pipeBounds.X + pipeBounds.Width < Bird.Left)
+            {
+                Score++;
+                Pipes.IsPassed = true;
+            }
+        }
+
+        private void CheckCollisions()
+        {
+            var pipeBounds = new[] { Pipes.PipeTop.GetBounds(), Pipes.PipeBottom.GetBounds() };
+
+            var birdBounds = Bird.GetBounds();
+            foreach (var bounds in pipeBounds)
+            {
+                if (birdBounds.IntersectsWith(bounds))
+                {
+                    GameOver();
+                }
+            }
+        }
+
+        public void StopGame()
+        {
+            if (IsRunning)
+            {
+                loopCancellationToken?.Cancel();
+                IsRunning = false;
+            }
+        }
+
+        public void GameOver()
+        {
+            StopGame();
+
+            IsGameOver = true;
+
+            BestScore = Math.Max(Score, BestScore);
         }
     }
 }

@@ -8,17 +8,13 @@
     >
     <div class="sky">
 
-        @if(GameManager?.IsRunning == true) 
+        @if(GameManager?.IsRunning == true ||
+            GameManager.IsGameOver) 
         {
-        <div class="bird" 
-            style="top: @(GameManager.Bird?.Top ?? 0)px; 
-            animation-name: @(GameManager.IsRunning ? "bird-animation" : "");
-            transform: rotate(@(GameManager.Bird.Velocity > 0.1 ? 20 : GameManager.Bird.Velocity >= 0 ? 0: -20)deg)
-        "></div>
 
         <div class="pipe top"
             style="left: @(GameManager.Pipes?.PipeTop.Left ?? 0)px;
-                top: calc(-160px + @(GameManager.Pipes?.PipeTop.Top ?? 0)px)"
+                top: calc(@(GameManager.Pipes?.PipeTop.Top ?? 0)px)"
             >
         </div>
         <div class="pipe bottom" 
@@ -26,15 +22,43 @@
                 top: calc(@(GameManager.Pipes?.PipeBottom.Top ?? 0)px)"
                 >
         </div>
+
+        <div class="bird" 
+            style="top: @(GameManager.Bird?.Top ?? 0)px; 
+            animation-name: @(GameManager.IsRunning && !GameManager.IsPaused ? "bird-animation" : "");
+            transform: rotate(@(GameManager.Bird.Velocity > 0.1 ? 20 : GameManager.Bird.Velocity >= 0 ? 0: -20)deg)
+        "></div>
+        
+        <div class="text" style="text-align: center;">@GameManager.Score</div>
         }
     </div>
     <div class="ground"
-        @onclick="e => Start()" 
-        style="animation-name: @(GameManager.IsRunning ? "ground-animation" : "")"></div>
+        @onclick="e => Start()"
+        style="animation-name: @(GameManager.IsRunning && !GameManager.IsPaused ? "ground-animation" : "")"></div>
 
 
-    <div style="position: absolute;top: 0;bottom: 0;left:0;right:0;">        
-    @if(GameManager?.IsRunning != true)
+    <div class="overlay">        
+    @if(GameManager.IsGameOver)
+    {
+        <div style="position: absolute; top: 80px;left: 15px;">
+        <img src="assets/text-gameover.png" />
+        <div style="background: url(assets/panel-scoreboard.png);width: 113px;height: 57px;margin-bottom: 10px;">
+            <div class="medal" style="position:absolute;left: 13px;top:45px;">
+                @if(GameManager.Score>2) {
+                  <img src="assets/coin-gold.png" />
+                }
+                else  {
+                  <img src="assets/coin-silver.png" />
+                }
+            </div>
+            <div class="text score" style="font-size: 10px;position: absolute; right: 18px;top:42px;">@GameManager.Score</div>
+            <div class="text score" style="font-size: 10px;position: absolute; right: 18px;top:63px;">@GameManager.BestScore</div>
+        </div>
+        
+        <img class="btn ok" src="assets/button-ok.png" @onclick="e => Start()" />
+        </div>
+    }
+    else if(GameManager?.IsRunning != true)
     {
         <img class="get-ready" src="assets/text-get-ready.png" />
         <img class="help-instruction" src="assets/help-instruction.png" />
@@ -42,9 +66,10 @@
     }
     else
     {
-        <img class="btn pause" src="assets/button-pause.png" @onclick="e => Start()" />
+        <img class="btn pause" src="assets/button-pause.png" @onmousedown="e => TogglePause()" @onmousedown:stopPropagation/>
     }
     </div>
+    
 </div>
 }
 
@@ -54,6 +79,18 @@
     public void Start()
     {
         GameManager.StartGame();
+    }
+
+    public void TogglePause()
+    {
+        if (GameManager.IsPaused)
+        {
+            GameManager.ResumeGame();
+        }
+        else
+        {
+            GameManager.PauseGame();
+        }
     }
 
     public void KeyDown(KeyboardEventArgs e)
@@ -75,6 +112,18 @@
 }
 
 <style>
+    .overlay {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left:0;
+        right:0;
+    }
+    .text {
+        font-family: "04B_19";
+        color: white;
+        filter: drop-shadow(1px 2px 0px rgba(0,0,0,0.4));
+    }
     .btn {
         cursor: pointer;
 
@@ -117,15 +166,22 @@
     }
 
     .scene {
-        scale: 2;
         margin: auto;
-        transform: translateX(-25%);
+        transform: translateX(-25%) scale(2, 2);
         transform-origin: 0 top;
         width: 144px;
         height: 256px;
         position: relative;
         overflow: hidden;
+        outline: none;
 
+        -webkit-touch-callout: none; /* iOS Safari */
+        -webkit-user-select: none; /* Safari */
+        -khtml-user-select: none; /* Konqueror HTML */
+        -moz-user-select: none; /* Old versions of Firefox */
+        -ms-user-select: none; /* Internet Explorer/Edge */
+        user-select: none; /* Non-prefixed version, currently
+                                  supported by Chrome, Edge, Opera and Firefox */
        
     }
 
@@ -148,7 +204,7 @@
         position: absolute;
         width: 17px;
         height: 12px;
-        left: calc(25% - 8px);
+        left: 40px;
         animation-duration: 0.5s;
         animation-timing-function: linear;
         animation-iteration-count: infinite;
@@ -231,5 +287,13 @@
         100% {
             background-image: url(assets/bird-wing-up.png);
         }
+    }
+
+    @@font-face {
+        font-family: '04B_19';
+        
+        src: url('assets/04B_19__.ttf') format('truetype'); /* Safari, Android, iOS */
+        font-weight: normal;
+        font-style: normal;
     }
 </style>
