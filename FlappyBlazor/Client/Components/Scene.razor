@@ -3,12 +3,19 @@
 <div class="scene" @onkeydown="e => KeyDown(e)" tabindex="0">
     <div class="sky" >
         <div class="bird" 
+            
             style="top: @(GameManager.Bird?.Top ?? 0)px; 
-            animation-name: @(GameManager.IsRunning ? "bird-animation" : "")
+            animation-name: @(GameManager.IsRunning ? "bird-animation" : "");
+            transform: rotate(@(GameManager.Bird.Velocity > 0.1 ? 20 : GameManager.Bird.Velocity >= 0 ? 0: -20)deg)
         "></div>
 
-        <div class="pipe top" ></div>
-        <div class="pipe bottom" ></div>
+        <div class="pipe top"
+            style="left: @(GameManager.Pipes?.PipeTop.Left ?? 0)px;
+top: calc(-160px + @(GameManager.Pipes?.PipeTop.Top ?? 0)px)"
+    ></div>
+        <div class="pipe bottom" 
+    style="left: @(GameManager.Pipes?.PipeBottom.Left ?? 0)px;
+top: calc(@(GameManager.Pipes?.PipeBottom.Top ?? 0)px)"></div>
     </div>
     <div class="ground" @onclick="e => Start()"
         style="animation-name: @(GameManager.IsRunning ? "ground-animation" : "")"></div>
@@ -46,6 +53,7 @@
         width: 144px;
         height: 256px;
         position: relative;
+        overflow: hidden;
     }
 
     .sky {
@@ -67,7 +75,7 @@
         position: absolute;
         width: 17px;
         height: 12px;
-        left: calc(50% - 8px);
+        left: calc(25% - 8px);
         animation-duration: 0.5s;
         animation-timing-function: linear;
         animation-iteration-count: infinite;
@@ -82,10 +90,10 @@
         filter: drop-shadow(1px 1px 2px rgba(0,0,0,0.3));
     }
 
-    .pipe {
+    .pipe {        
         position: absolute;
-        width: 200px;
-        height: 100%;
+        width: 26px;
+        height: 160px;
 
         image-rendering: optimizeSpeed;             /* STOP SMOOTHING, GIVE ME SPEED  */
         image-rendering: -moz-crisp-edges;          /* Firefox                        */
@@ -94,6 +102,16 @@
         image-rendering: pixelated; /* Chrome */
         image-rendering: optimize-contrast;         /* CSS3 Proposed                  */
         -ms-interpolation-mode: nearest-neighbor;   /* IE8+                           */
+    }
+    .pipe.top {
+        
+        top: 100px;
+        background: url("assets/pipe-down.png") no-repeat;
+    }
+    .pipe.bottom {
+        
+        bottom: 100px;
+        background: url("assets/pipe-up.png") no-repeat;
     }
 
     .ground {
@@ -105,7 +123,7 @@
         right: 0;
         height: 40px;
         background-color: brown;
-        animation-duration: 0.25s;
+        animation-duration: 0.14s;
         animation-timing-function: linear;
         animation-iteration-count: infinite;
 
