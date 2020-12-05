@@ -1,9 +1,16 @@
 ﻿@if (GameManager != null)
 {
-<div class="scene" @onkeydown="e => KeyDown(e)" tabindex="0">
-    <div class="sky" >
+<div 
+    class="scene" 
+    tabindex="0"
+    @onkeydown="e => KeyDown(e)" 
+    @onmousedown="e => MouseDown(e)"
+    >
+    <div class="sky">
+
+        @if(GameManager?.IsRunning == true) 
+        {
         <div class="bird" 
-            
             style="top: @(GameManager.Bird?.Top ?? 0)px; 
             animation-name: @(GameManager.IsRunning ? "bird-animation" : "");
             transform: rotate(@(GameManager.Bird.Velocity > 0.1 ? 20 : GameManager.Bird.Velocity >= 0 ? 0: -20)deg)
@@ -11,14 +18,33 @@
 
         <div class="pipe top"
             style="left: @(GameManager.Pipes?.PipeTop.Left ?? 0)px;
-top: calc(-160px + @(GameManager.Pipes?.PipeTop.Top ?? 0)px)"
-    ></div>
+                top: calc(-160px + @(GameManager.Pipes?.PipeTop.Top ?? 0)px)"
+            >
+        </div>
         <div class="pipe bottom" 
-    style="left: @(GameManager.Pipes?.PipeBottom.Left ?? 0)px;
-top: calc(@(GameManager.Pipes?.PipeBottom.Top ?? 0)px)"></div>
+            style="left: @(GameManager.Pipes?.PipeBottom.Left ?? 0)px;
+                top: calc(@(GameManager.Pipes?.PipeBottom.Top ?? 0)px)"
+                >
+        </div>
+        }
     </div>
-    <div class="ground" @onclick="e => Start()"
+    <div class="ground"
+        @onclick="e => Start()" 
         style="animation-name: @(GameManager.IsRunning ? "ground-animation" : "")"></div>
+
+
+    <div style="position: absolute;top: 0;bottom: 0;left:0;right:0;">        
+    @if(GameManager?.IsRunning != true)
+    {
+        <img class="get-ready" src="assets/text-get-ready.png" />
+        <img class="help-instruction" src="assets/help-instruction.png" />
+        <img class="btn play" src="assets/button-play.png" @onclick="e => Start()" />
+    }
+    else
+    {
+        <img class="btn pause" src="assets/button-pause.png" @onclick="e => Start()" />
+    }
+    </div>
 </div>
 }
 
@@ -32,7 +58,10 @@ top: calc(@(GameManager.Pipes?.PipeBottom.Top ?? 0)px)"></div>
 
     public void KeyDown(KeyboardEventArgs e)
     {
-        Console.WriteLine("Key down");
+        GameManager.Bird.Jump();
+    }
+    public void MouseDown(MouseEventArgs e)
+    {
         GameManager.Bird.Jump();
     }
 
@@ -46,14 +75,58 @@ top: calc(@(GameManager.Pipes?.PipeBottom.Top ?? 0)px)"></div>
 }
 
 <style>
+    .btn {
+        cursor: pointer;
+
+        -webkit-touch-callout: none; /* iOS Safari */
+        -webkit-user-select: none; /* Safari */
+        -khtml-user-select: none; /* Konqueror HTML */
+        -moz-user-select: none; /* Old versions of Firefox */
+        -ms-user-select: none; /* Internet Explorer/Edge */
+        user-select: none; /* Non-prefixed version, currently
+                                  supported by Chrome, Edge, Opera and Firefox */
+    }
+
+    .btn:hover {
+        transform: translateY(-1px) translateX(-0.5px);
+        transform-origin: top left;
+    }
+
+    .get-ready {
+        position: absolute;
+        top: calc(50% - 50px); 
+        left: calc(50% - 40px);
+    }
+
+    .play {
+        position: absolute;
+        top: 45%;
+        left: calc(50% - 23px);
+    }
+
+    .help-instruction {
+        position: absolute;
+        top: 65%;
+        left: calc(50% - 23px);
+    }
+
+    .pause {
+        position: absolute;
+        top: 3px;
+        left: 3px;
+    }
+
     .scene {
         scale: 2;
-        transform-origin: 0 0;
-        margin: 20px;
+        margin: auto;
+        transform: translateX(-25%);
+        transform-origin: 0 top;
         width: 144px;
         height: 256px;
         position: relative;
         overflow: hidden;
+
+       
     }
 
     .sky {
@@ -122,7 +195,6 @@ top: calc(@(GameManager.Pipes?.PipeBottom.Top ?? 0)px)"></div>
         left: 0;
         right: 0;
         height: 40px;
-        background-color: brown;
         animation-duration: 0.14s;
         animation-timing-function: linear;
         animation-iteration-count: infinite;

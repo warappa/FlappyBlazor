@@ -85,8 +85,8 @@ namespace FlappyBlazor.Client.Domain
 
     public class GameManager
     {
-        public Bird Bird { get; set; }
-        public Pipes Pipes { get; set; }
+        public Bird Bird { get; set; } = new Bird();
+        public Pipes Pipes { get; set; } = new Pipes();
 
         public bool IsRunning { get; private set; }
 
@@ -105,10 +105,8 @@ namespace FlappyBlazor.Client.Domain
 
             Console.WriteLine("Start Game");
 
-            Bird = new Bird();
             Bird.Reset();
 
-            Pipes = new Pipes();
             Pipes.Reset();
 
             IsRunning = true;
