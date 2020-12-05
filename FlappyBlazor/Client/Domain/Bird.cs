@@ -10,6 +10,8 @@ namespace FlappyBlazor.Client.Domain
         public double Velocity { get; set; } = 0.0;
 
         public bool Jumped { get; private set; }
+        public int MultiJumpCount { get; set; }
+        public double MultiJumpElapsed { get; set; }
         public int Left { get; internal set; } = 20;
 
         public Rectangle GetBounds()
@@ -19,11 +21,23 @@ namespace FlappyBlazor.Client.Domain
 
         public void Move(double delta)
         {
+            MultiJumpElapsed += delta;
+
             if (Jumped)
             {
+                //Console.WriteLine("MultiJumpCount: " + MultiJumpCount);
                 Jumped = false;
-                Velocity = -2.8;
+                Velocity = -2 - MultiJumpCount * 0.3;
+                MultiJumpCount++;
+                MultiJumpElapsed = 0;
             }
+            else if (MultiJumpElapsed > 50)
+            {
+                //Console.WriteLine("MultiJumpElapsed");
+                MultiJumpCount = 0;
+                MultiJumpElapsed = 0;
+            }
+
             Velocity = Velocity + Gravity * delta;
             //Console.WriteLine($"Velocity {Gravity} {Velocity} {delta}");
             Top += (int)Math.Floor(Velocity);
