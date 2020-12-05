@@ -5,12 +5,12 @@ namespace FlappyBlazor.Client.Domain
 {
     public class Bird
     {
-        public double Gravity = 0.15;
+        public double Gravity = 0.10;
         public int Top { get; internal set; } = 0;
         public double Velocity { get; set; } = 0.0;
 
         public bool Jumped { get; private set; }
-        public int Left { get; internal set; } = 40;
+        public int Left { get; internal set; } = 20;
 
         public Rectangle GetBounds()
         {
@@ -22,7 +22,7 @@ namespace FlappyBlazor.Client.Domain
             if (Jumped)
             {
                 Jumped = false;
-                Velocity = -3;
+                Velocity = -2.8;
             }
             Velocity = Velocity + Gravity * delta;
             //Console.WriteLine($"Velocity {Gravity} {Velocity} {delta}");

@@ -21,17 +21,12 @@ namespace FlappyBlazor.Client.Domain
             //Console.WriteLine($"Velocity {Gravity} {Velocity} {delta}");
             PipeTop.Left -= (int)Math.Floor(Velocity * delta);
             PipeBottom.Left -= (int)Math.Floor(Velocity * delta);
-
-            if (PipeTop.Left < -30)
-            {
-                Reset();
-            }
         }
 
         public void Reset()
         {
-            PipeTop.Left = 150;
-            PipeBottom.Left = 150;
+            PipeTop.Left += 180;
+            PipeBottom.Left += 180;
 
             var random = 128 - 40 + new Random().Next(-44, 44);
             PipeTop.Top = random - 35 - 160;

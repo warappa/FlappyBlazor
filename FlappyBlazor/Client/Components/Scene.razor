@@ -6,26 +6,30 @@
     @onkeydown="e => KeyDown(e)" 
     @onmousedown="e => MouseDown(e)"
     >
-    <div class="sky">
+    <div class="sky" style="animation-play-state: @(GameManager.IsRunning && !GameManager.IsPaused ? "running" : "paused");">
 
-        @if(GameManager?.IsRunning == true ||
+        @if(GameManager.IsRunning == true ||
             GameManager.IsGameOver) 
         {
 
-        <div class="pipe top"
-            style="left: @(GameManager.Pipes?.PipeTop.Left ?? 0)px;
-                top: calc(@(GameManager.Pipes?.PipeTop.Top ?? 0)px)"
-            >
-        </div>
-        <div class="pipe bottom" 
-            style="left: @(GameManager.Pipes?.PipeBottom.Left ?? 0)px;
-                top: calc(@(GameManager.Pipes?.PipeBottom.Top ?? 0)px)"
+            foreach(var pipes in GameManager.Pipes)
+            {
+            <div class="pipe top"
+                style="left: @(pipes.PipeTop.Left)px;
+                    top: calc(@(pipes.PipeTop.Top)px)"
                 >
-        </div>
+            </div>
+            <div class="pipe bottom" 
+                style="left: @(pipes.PipeBottom.Left)px;
+                    top: calc(@(pipes.PipeBottom.Top)px)"
+                    >
+            </div>
+            }
 
         <div class="bird" 
             style="top: @(GameManager.Bird?.Top ?? 0)px; 
-            animation-name: @(GameManager.IsRunning && !GameManager.IsPaused ? "bird-animation" : "");
+            left: @(GameManager.Bird?.Left ?? 0)px;
+            animation-play-state: @(GameManager.IsRunning && !GameManager.IsPaused ? "running" : "paused");
             transform: rotate(@(GameManager.Bird.Velocity > 0.1 ? 20 : GameManager.Bird.Velocity >= 0 ? 0: -20)deg)
         "></div>
         
@@ -34,10 +38,9 @@
     </div>
     <div class="ground"
         @onclick="e => Start()"
-        style="animation-name: @(GameManager.IsRunning && !GameManager.IsPaused ? "ground-animation" : "")"></div>
+        style="animation-play-state: @(GameManager.IsRunning && !GameManager.IsPaused ? "running" : "paused")"></div>
 
-
-    <div class="overlay">        
+    <div class="overlay @((GameManager.IsRunning && GameManager.IsPaused) || GameManager.IsGameOver ? "darken" : "")">        
     @if(GameManager.IsGameOver)
     {
         <div style="position: absolute; top: 80px;left: 15px;">
@@ -56,17 +59,23 @@
         </div>
         
         <img class="btn ok" src="assets/button-ok.png" @onclick="e => Start()" />
+        <span class="btn text quit" @onmousedown="e => Stop()" @onmousedown:stopPropagation>Quit</span>
         </div>
     }
-    else if(GameManager?.IsRunning != true)
+    else if(GameManager.IsRunning)
+    {
+        <img class="btn pause" src="assets/button-pause.png" @onmousedown="e => TogglePause()" @onmousedown:stopPropagation/>
+
+        if(GameManager.IsPaused)
+        {
+            <span class="btn text quit" @onmousedown="e => Stop()" @onmousedown:stopPropagation>Quit</span>
+        }
+    }
+    else
     {
         <img class="get-ready" src="assets/text-get-ready.png" />
         <img class="help-instruction" src="assets/help-instruction.png" />
         <img class="btn play" src="assets/button-play.png" @onclick="e => Start()" />
-    }
-    else
-    {
-        <img class="btn pause" src="assets/button-pause.png" @onmousedown="e => TogglePause()" @onmousedown:stopPropagation/>
     }
     </div>
     
@@ -79,6 +88,11 @@
     public void Start()
     {
         GameManager.StartGame();
+    }
+
+    public void Stop()
+    {
+        GameManager.StopGame();
     }
 
     public void TogglePause()
@@ -119,6 +133,10 @@
         left:0;
         right:0;
     }
+    .overlay.darken {
+        background-color: rgba(0,0,0,0.3);
+    }
+
     .text {
         font-family: "04B_19";
         color: white;
@@ -165,6 +183,12 @@
         left: 3px;
     }
 
+    .quit {
+        position: absolute;
+        top: 90px;
+        left: 55px;
+    }
+
     .scene {
         margin: auto;
         transform: translateX(-25%) scale(2, 2);
@@ -186,9 +210,14 @@
     }
 
     .sky {
-        background: url("assets/bg-day.png") no-repeat;
+        background: url("assets/bg-day.png");
         width: 100%;
         height: 100%;
+        
+        animation-name: sky-animation;
+        animation-duration: 14s;
+        animation-timing-function: linear;
+        animation-iteration-count: infinite;
             
         image-rendering: optimizeSpeed;             /* STOP SMOOTHING, GIVE ME SPEED  */
         image-rendering: -moz-crisp-edges;          /* Firefox                        */
@@ -204,7 +233,8 @@
         position: absolute;
         width: 17px;
         height: 12px;
-        left: 40px;
+
+        animation-name: bird-animation;
         animation-duration: 0.5s;
         animation-timing-function: linear;
         animation-iteration-count: infinite;
@@ -251,6 +281,8 @@
         left: 0;
         right: 0;
         height: 40px;
+
+        animation-name: ground-animation;
         animation-duration: 0.14s;
         animation-timing-function: linear;
         animation-iteration-count: infinite;
@@ -269,6 +301,14 @@
         }
         to {
             background-position-x: -11px;
+        }
+    }
+    @@keyframes sky-animation {
+        from {
+            background-position-x: 0px;
+        }
+        to {
+            background-position-x: -144px;
         }
     }
     @@keyframes bird-animation {
