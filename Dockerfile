@@ -2,8 +2,8 @@ FROM mcr.microsoft.com/dotnet/sdk:5.0 AS build-env
 WORKDIR /app
 
 # copy csproj and restore as distinct layers
-COPY ./FlappyBlazor.Client/*.csproj ./FlappyBlazor.Client/
-COPY ./FlappyBlazor.Server/*.csproj ./FlappyBlazor.Server/
+COPY ./FlappyBlazor/Client/*.csproj ./FlappyBlazor/Client/
+COPY ./FlappyBlazor/Server/*.csproj ./FlappyBlazor/Server/
 COPY ./FlappyBlazor.sln ./
 RUN dotnet restore
 
