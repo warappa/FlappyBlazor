@@ -1,3 +1,4 @@
+#if LIVESHARP
 using LiveSharp;
 
 // Use this attribute to designate which types and methods will be available for runtime code update
@@ -30,3 +31,4 @@ namespace LiveSharp
         }
     } 
 }
+#endif
