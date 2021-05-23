@@ -4,6 +4,7 @@ WORKDIR /app
 # copy csproj and restore as distinct layers
 COPY ./FlappyBlazor/Client/*.csproj ./FlappyBlazor/Client/
 COPY ./FlappyBlazor/Server/*.csproj ./FlappyBlazor/Server/
+COPY ./FlappyBlazor/Shared/*.csproj ./FlappyBlazor/Shared/
 COPY ./FlappyBlazor.sln ./
 RUN dotnet restore
 
