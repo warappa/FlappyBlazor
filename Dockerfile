@@ -10,10 +10,10 @@ RUN dotnet restore
 
 # copy everything else and build
 COPY . ./
-RUN dotnet publish -c Release -o out
+RUN dotnet publish FlappyBlazor/Server/FlappyBlazor.Server.csproj -c Release -o out
 
 # build runtime image
 FROM mcr.microsoft.com/dotnet/aspnet:5.0
 WORKDIR /app
 COPY --from=build-env /app/out .
-ENTRYPOINT ["dotnet", "aspnetapp.dll"]
+ENTRYPOINT ["dotnet", "FlappyBlazor.Server.dll"]
