@@ -1,0 +1,1 @@
+caprover deploy -c .\captain-definition -n skillrefactory -a flappy-blazor -b master
