@@ -71,7 +71,7 @@ namespace FlappyBlazor.Client.Domain
 
                     Bird.Move(delta);
 
-                    Pipes.Move(delta);
+                    Pipes.Move(-delta);
 
                     CheckCollisions();
 

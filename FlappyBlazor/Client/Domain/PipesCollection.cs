@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace FlappyBlazor.Client.Domain
 {
@@ -30,24 +31,30 @@ namespace FlappyBlazor.Client.Domain
 
         private void CheckOverlaps(Pipes p)
         {
-            for (var i = 0; i < Count; i++)
+            var previous = this
+                .Where(x => x != p)
+                .MaxBy(x => x.PipeTop.Left);
+
+            p.SetLeft(144);
+
+            var tooNear = true;
+            var overlap = true;
+            while (overlap || tooNear)
             {
-                var pp = this[i];
-
-                if (pp == p)
+                if (overlap)
                 {
-                    continue;
+                    p.Move(10);
+                }
+                if (tooNear)
+                {
+                    p.SetRandomVerticalOffset();
                 }
 
-                //Console.WriteLine($"check {pp.PipeTop.GetBounds()} vs {p.PipeTop.GetBounds()}");
-                if (pp.PipeTop.GetBounds()
-                    .IntersectsWith(p.PipeTop.GetBounds()))
-                {
-                    Console.WriteLine("Next try");
-                    p.PipeTop.Left += 70;
-                    p.PipeBottom.Left += 70;
-                    i = 0;
-                }
+                var previousLeft = previous?.PipeTop?.Left ?? -1000;
+                overlap = previousLeft + 70 >= p.PipeTop.Left;
+                   
+                var previousTop = previous?.PipeTop.Top ?? -1000;
+                tooNear = Math.Abs(previousTop - p.PipeTop.Top) < 30;
             }
         }
 
